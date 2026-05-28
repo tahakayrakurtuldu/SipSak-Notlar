@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f0f0f">
+<title>Şipşak Notlar</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --paper: #faf7f0;
+    --paper2: #f5f0e8;
+    --accent: #e63946;
+    --accent2: #f4a261;
+    --line: #d4c5a9;
+    --shadow: rgba(0,0,0,0.15);
+  }
+
+  body {
+    background: var(--ink);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── ANA EKRAN ── */
+  #home {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--ink);
+    position: relative;
+  }
+
+  #home::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(230,57,70,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(244,162,97,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .header {
+    padding: 48px 24px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .app-title {
+    font-family: 'Caveat', cursive;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--paper);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .app-title span {
+    color: var(--accent);
+  }
+
+  .app-subtitle {
+    font-size: 10px;
+    color: rgba(250,247,240,0.4);
+    margin-top: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .new-note-btn {
+    margin: 16px 24px 0;
+    position: relative;
+    z-index: 1;
+    background: var(--accent);
+    border: none;
+    border-radius: 4px;
+    padding: 16px 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    width: calc(100% - 48px);
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 4px 4px 0 rgba(230,57,70,0.3);
+  }
+
+  .new-note-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 rgba(230,57,70,0.3);
+  }
+
+  .new-note-btn .btn-icon {
+    font-size: 20px;
+    font-family: 'Caveat', cursive;
+  }
+
+  .notes-section {
+    padding: 32px 24px 24px;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+  }
+
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(250,247,240,0.3);
+    margin-bottom: 16px;
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .note-card {
+    background: var(--paper);
+    border-radius: 2px;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+    aspect-ratio: 3/4;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .note-card:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  }
+
+  .note-card-tape {
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg);
+    width: 40px;
+    height: 16px;
+    background: rgba(244,162,97,0.6);
+    z-index: 2;
+  }
+
+  .note-card-lines {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 23px,
+      var(--line) 23px,
+      var(--line) 24px
+    );
+    background-position: 0 32px;
+    opacity: 0.5;
+  }
+
+  .note-card-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .note-card-date {
+    position: absolute;
+    bottom: 6px;
+    right: 8px;
+    font-size: 8px;
+    color: rgba(26,26,46,0.35);
+    font-family: 'Space Mono', monospace;
+    z-index: 3;
+  }
+
+  .empty-state {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 48px 0;
+  }
+
+  .empty-state .empty-icon {
+    font-family: 'Caveat', cursive;
+    font-size: 64px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.3;
+  }
+
+  .empty-state p {
+    font-size: 11px;
+    color: rgba(250,247,240,0.25);
+    letter-spacing: 1px;
+  }
+
+  /* ── YAZMA EKRANI ── */
+  #write-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    z-index: 100;
+    flex-direction: column;
+  }
+
+  #write-screen.active {
+    display: flex;
+  }
+
+  .write-header {
+    padding: 20px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--line);
+    background: var(--paper2);
+    flex-shrink: 0;
+  }
+
+  .write-title {
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .timer-circle {
+    width: 52px;
+    height: 52px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .timer-circle svg {
+    transform: rotate(-90deg);
+    width: 52px;
+    height: 52px;
+  }
+
+  .timer-bg {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 3;
+  }
+
+  .timer-arc {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 138.2;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear, stroke 0.3s;
+  }
+
+  .timer-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .canvas-wrap {
+    flex: 1;
+    position: relative;
+    background: var(--paper);
+    background-image:
+      repeating-linear-gradient(
+        transparent,
+        transparent 35px,
+        var(--line) 35px,
+        var(--line) 36px
+      );
+    background-position: 0 60px;
+    overflow: hidden;
+  }
+
+  #draw-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .canvas-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Caveat', cursive;
+    font-size: 28px;
+    color: rgba(26,26,46,0.12);
+    pointer-events: none;
+    text-align: center;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .write-footer {
+    padding: 12px 20px 28px;
+    display: flex;
+    gap: 10px;
+    background: var(--paper2);
+    border-top: 2px solid var(--line);
+    flex-shrink: 0;
+  }
+
+  .btn-save {
+    flex: 1;
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 2px;
+    padding: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .btn-save:active { opacity: 0.8; }
+
+  .btn-discard {
+    background: transparent;
+    color: rgba(26,26,46,0.4);
+    border: 2px solid var(--line);
+    border-radius: 2px;
+    padding: 14px 18px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .btn-discard:active { opacity: 0.6; }
+
+  /* ── GÖRÜNTÜLEME EKRANI ── */
+  #view-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--ink);
+    z-index: 100;
+    flex-direction: column;
+  }
+
+  #view-screen.active { display: flex; }
+
+  .view-header {
+    padding: 20px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .back-btn {
+    background: transparent;
+    border: none;
+    color: var(--paper);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    padding: 8px 0;
+  }
+
+  .delete-btn {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 8px 0;
+  }
+
+  .view-note-wrap {
+    flex: 1;
+    margin: 0 20px 20px;
+    background: var(--paper);
+    border-radius: 2px;
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .view-note-lines {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 35px,
+      var(--line) 35px,
+      var(--line) 36px
+    );
+    background-position: 0 48px;
+    opacity: 0.6;
+  }
+
+  .view-tape {
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-0.5deg);
+    width: 60px;
+    height: 20px;
+    background: rgba(244,162,97,0.5);
+    z-index: 2;
+  }
+
+  #view-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .view-date {
+    position: absolute;
+    bottom: 10px;
+    right: 14px;
+    font-size: 9px;
+    color: rgba(26,26,46,0.3);
+    font-family: 'Space Mono', monospace;
+    z-index: 3;
+  }
+
+  /* ── SÜRE DOLDU ── */
+  #time-up-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(230,57,70,0.95);
+    z-index: 200;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  #time-up-overlay.active { display: flex; }
+
+  .time-up-text {
+    font-family: 'Caveat', cursive;
+    font-size: 64px;
+    color: white;
+    font-weight: 700;
+    animation: shake 0.4s ease;
+  }
+
+  .time-up-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .time-up-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .time-up-save {
+    background: white;
+    color: var(--accent);
+    border: none;
+    border-radius: 2px;
+    padding: 14px 28px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+  }
+
+  .time-up-discard {
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 2px;
+    padding: 14px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px) rotate(-2deg); }
+    60% { transform: translateX(8px) rotate(2deg); }
+  }
+
+  /* Kalem kalınlık seçici */
+  .pen-tools {
+    padding: 8px 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: var(--paper2);
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+
+  .pen-size {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    background: var(--paper);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s;
+  }
+
+  .pen-size.active { border-color: var(--accent); }
+
+  .pen-size-dot {
+    background: var(--ink);
+    border-radius: 50%;
+  }
+
+  .pen-eraser {
+    margin-left: auto;
+    background: transparent;
+    border: 2px solid var(--line);
+    border-radius: 2px;
+    padding: 6px 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: rgba(26,26,46,0.6);
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .pen-eraser.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .pen-clear {
+    background: transparent;
+    border: 2px solid var(--line);
+    border-radius: 2px;
+    padding: 6px 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: rgba(26,26,46,0.4);
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- ANA EKRAN -->
+<div id="home">
+  <div class="header">
+    <div class="app-title">Şipşak<span>!</span></div>
+    <div class="app-subtitle">El yazısı not defteri</div>
+  </div>
+
+  <button class="new-note-btn" onclick="startNewNote()">
+    <span class="btn-icon">✍</span>
+    Yeni Not — 20 Saniye
+  </button>
+
+  <div class="notes-section">
+    <div class="section-label">Kaydedilen Notlar</div>
+    <div class="notes-grid" id="notes-grid">
+      <div class="empty-state">
+        <span class="empty-icon">📝</span>
+        <p>Henüz not yok</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- YAZMA EKRANI -->
+<div id="write-screen">
+  <div class="write-header">
+    <div class="write-title">Yazmaya başla!</div>
+    <div class="timer-circle">
+      <svg viewBox="0 0 46 46">
+        <circle class="timer-bg" cx="23" cy="23" r="22"/>
+        <circle class="timer-arc" id="timer-arc" cx="23" cy="23" r="22"/>
+      </svg>
+      <div class="timer-text" id="timer-text">20</div>
+    </div>
+  </div>
+
+  <div class="pen-tools">
+    <div class="pen-size active" onclick="setPenSize(2, this)" title="İnce">
+      <div class="pen-size-dot" style="width:4px;height:4px"></div>
+    </div>
+    <div class="pen-size" onclick="setPenSize(4, this)" title="Orta">
+      <div class="pen-size-dot" style="width:8px;height:8px"></div>
+    </div>
+    <div class="pen-size" onclick="setPenSize(7, this)" title="Kalın">
+      <div class="pen-size-dot" style="width:14px;height:14px"></div>
+    </div>
+    <button class="pen-eraser" id="eraser-btn" onclick="toggleEraser()">Sil</button>
+    <button class="pen-clear" onclick="clearCanvas()">Temizle</button>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="draw-canvas"></canvas>
+    <div class="canvas-hint" id="canvas-hint">buraya yaz...</div>
+  </div>
+
+  <div class="write-footer">
+    <button class="btn-save" onclick="saveNote()">Kaydet</button>
+    <button class="btn-discard" onclick="discardNote()">İptal</button>
+  </div>
+</div>
+
+<!-- SÜRE DOLDU -->
+<div id="time-up-overlay">
+  <div class="time-up-text">Süre Doldu!</div>
+  <div class="time-up-sub">Notu kaydetmek ister misin?</div>
+  <div class="time-up-actions">
+    <button class="time-up-save" onclick="saveNote()">Kaydet</button>
+    <button class="time-up-discard" onclick="discardNote()">Sil</button>
+  </div>
+</div>
+
+<!-- GÖRÜNTÜLEME EKRANI -->
+<div id="view-screen">
+  <div class="view-header">
+    <button class="back-btn" onclick="closeView()">← Geri</button>
+    <button class="delete-btn" onclick="deleteCurrentNote()">Sil</button>
+  </div>
+  <div class="view-note-wrap">
+    <div class="view-note-lines"></div>
+    <div class="view-tape"></div>
+    <canvas id="view-canvas"></canvas>
+    <div class="view-date" id="view-date"></div>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  let notes = JSON.parse(localStorage.getItem('sipsak_notes') || '[]');
+  let timer = null;
+  let timeLeft = 20;
+  let isEraser = false;
+  let penSize = 2;
+  let currentNoteIndex = -1;
+
+  // ── CANVAS SETUP ──
+  const drawCanvas = document.getElementById('draw-canvas');
+  const ctx = drawCanvas.getContext('2d');
+  let drawing = false;
+  let lastX = 0, lastY = 0;
+
+  function resizeCanvas() {
+    const wrap = drawCanvas.parentElement;
+    const w = wrap.clientWidth;
+    const h = wrap.clientHeight;
+    const data = ctx.getImageData(0, 0, drawCanvas.width, drawCanvas.height);
+    drawCanvas.width = w;
+    drawCanvas.height = h;
+    ctx.putImageData(data, 0, 0);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }
+
+  function getPos(e) {
+    const rect = drawCanvas.getBoundingClientRect();
+    if (e.touches) {
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top
+      };
+    }
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    drawing = true;
+    const pos = getPos(e);
+    lastX = pos.x; lastY = pos.y;
+    document.getElementById('canvas-hint').style.display = 'none';
+  }
+
+  function draw(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    ctx.beginPath();
+    if (isEraser) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = penSize * 5;
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.lineWidth = penSize;
+      ctx.strokeStyle = '#1a1a2e';
+    }
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    lastX = pos.x; lastY = pos.y;
+  }
+
+  function stopDraw() { drawing = false; }
+
+  drawCanvas.addEventListener('mousedown', startDraw);
+  drawCanvas.addEventListener('mousemove', draw);
+  drawCanvas.addEventListener('mouseup', stopDraw);
+  drawCanvas.addEventListener('mouseleave', stopDraw);
+  drawCanvas.addEventListener('touchstart', startDraw, { passive: false });
+  drawCanvas.addEventListener('touchmove', draw, { passive: false });
+  drawCanvas.addEventListener('touchend', stopDraw);
+
+  // ── PEN TOOLS ──
+  function setPenSize(size, el) {
+    penSize = size;
+    isEraser = false;
+    document.querySelectorAll('.pen-size').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('eraser-btn').classList.remove('active');
+  }
+
+  function toggleEraser() {
+    isEraser = !isEraser;
+    document.getElementById('eraser-btn').classList.toggle('active', isEraser);
+  }
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+    document.getElementById('canvas-hint').style.display = '';
+  }
+
+  // ── TIMER ──
+  const circumference = 2 * Math.PI * 22;
+
+  function updateTimerUI(t) {
+    const arc = document.getElementById('timer-arc');
+    const txt = document.getElementById('timer-text');
+    const frac = t / 20;
+    arc.style.strokeDashoffset = circumference * (1 - frac);
+    txt.textContent = t;
+    if (t <= 5) arc.style.stroke = '#e63946';
+    else arc.style.stroke = '#e63946';
+  }
+
+  function startTimer() {
+    timeLeft = 20;
+    updateTimerUI(timeLeft);
+    timer = setInterval(() => {
+      timeLeft--;
+      updateTimerUI(timeLeft);
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        document.getElementById('time-up-overlay').classList.add('active');
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+
+  // ── NOTE ACTIONS ──
+  function startNewNote() {
+    document.getElementById('write-screen').classList.add('active');
+    document.getElementById('canvas-hint').style.display = '';
+    isEraser = false;
+    document.getElementById('eraser-btn').classList.remove('active');
+
+    setTimeout(() => {
+      resizeCanvas();
+      ctx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      startTimer();
+    }, 50);
+  }
+
+  function saveNote() {
+    stopTimer();
+    document.getElementById('time-up-overlay').classList.remove('active');
+
+    const dataURL = drawCanvas.toDataURL('image/png');
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+    notes.unshift({ data: dataURL, date: dateStr, ts: Date.now() });
+    localStorage.setItem('sipsak_notes', JSON.stringify(notes));
+
+    document.getElementById('write-screen').classList.remove('active');
+    renderNotes();
+  }
+
+  function discardNote() {
+    stopTimer();
+    document.getElementById('time-up-overlay').classList.remove('active');
+    document.getElementById('write-screen').classList.remove('active');
+  }
+
+  // ── RENDER NOTES ──
+  function renderNotes() {
+    const grid = document.getElementById('notes-grid');
+    if (notes.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><span class="empty-icon">📝</span><p>Henüz not yok</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = '';
+    notes.forEach((note, i) => {
+      const card = document.createElement('div');
+      card.className = 'note-card';
+      card.onclick = () => viewNote(i);
+
+      const tape = document.createElement('div');
+      tape.className = 'note-card-tape';
+      tape.style.transform = `translateX(-50%) rotate(${(i % 3 - 1) * 2}deg)`;
+
+      const lines = document.createElement('div');
+      lines.className = 'note-card-lines';
+
+      const canvas = document.createElement('canvas');
+      canvas.className = 'note-card-canvas';
+
+      const dateEl = document.createElement('div');
+      dateEl.className = 'note-card-date';
+      dateEl.textContent = note.date;
+
+      card.appendChild(tape);
+      card.appendChild(lines);
+      card.appendChild(canvas);
+      card.appendChild(dateEl);
+      grid.appendChild(card);
+
+      // Thumbnail çiz
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = card.offsetWidth;
+        canvas.height = card.offsetHeight;
+        const c = canvas.getContext('2d');
+        c.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+      img.src = note.data;
+    });
+  }
+
+  // ── VIEW NOTE ──
+  function viewNote(i) {
+    currentNoteIndex = i;
+    const note = notes[i];
+    document.getElementById('view-screen').classList.add('active');
+    document.getElementById('view-date').textContent = note.date;
+
+    setTimeout(() => {
+      const vc = document.getElementById('view-canvas');
+      const wrap = vc.parentElement;
+      vc.width = wrap.clientWidth;
+      vc.height = wrap.clientHeight;
+      const ctx2 = vc.getContext('2d');
+      const img = new Image();
+      img.onload = () => ctx2.drawImage(img, 0, 0, vc.width, vc.height);
+      img.src = note.data;
+    }, 50);
+  }
+
+  function closeView() {
+    document.getElementById('view-screen').classList.remove('active');
+    currentNoteIndex = -1;
+  }
+
+  function deleteCurrentNote() {
+    if (currentNoteIndex < 0) return;
+    if (confirm('Bu notu silmek istiyor musun?')) {
+      notes.splice(currentNoteIndex, 1);
+      localStorage.setItem('sipsak_notes', JSON.stringify(notes));
+      closeView();
+      renderNotes();
+    }
+  }
+
+  // ── INIT ──
+  renderNotes();
+  window.addEventListener('resize', () => {
+    if (document.getElementById('write-screen').classList.contains('active')) resizeCanvas();
+  });
+</script>
+</body>
+</html>
