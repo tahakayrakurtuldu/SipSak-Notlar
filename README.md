@@ -1,64 +1,64 @@
-# Şipşak Notlar 📝
+# SipSak Notes 📝
 
-Hızlı, el yazısı tarzında dijital not defteri uygulaması.
+A fast, handwriting-style digital note-taking application.
 
-## 🎯 Özellikler
+## 🎯 Features
 
-- **Hızlı Not Alma**: Her not için 20 saniyelik yazma süresi
-- **El Yazısı Simülasyonu**: Canvas tabanlı el yazısı görünümü
-- **Kalem Araçları**: 
-  - İnce, Orta ve Kalın kalem seçenekleri
-  - Silgi fonksiyonu
-  - Canvas temizleme
-- **Not Kartları**: Şıklı not kartlarıyla ana ekranda görüntülenme
-- **Not Yönetimi**: Kaydedilen notları görüntüleme ve silme
-- **Lokal Depolama**: Tüm notlar tarayıcı localStorage'da saklanır
-- **Responsive Tasarım**: Mobil ve masaüstü cihazlarda uyumlu
-- **Türkçe Dil Desteği**: Tam türkçe arayüz
+- **Quick Note Taking**: 20-second writing time limit per note
+- **Handwriting Simulation**: Canvas-based handwriting appearance
+- **Pen Tools**: 
+  - Thin, Medium, and Bold pen options
+  - Eraser function
+  - Canvas clear
+- **Note Cards**: Beautiful note cards displayed on the home screen
+- **Note Management**: View and delete saved notes
+- **Local Storage**: All notes are stored in browser localStorage
+- **Responsive Design**: Compatible with mobile and desktop devices
+- **Turkish Language Support**: Fully Turkish user interface
 
-## 🎨 Tasarım
+## 🎨 Design
 
 - Modern minimalist UI
-- Deftere yapışkan notlar tarzında görünüm
-- Smooth animasyonlar ve geçişler
-- Açık renk şeması (krem/beyaz defter, koyu ink rengi)
-- Yazı tipleri: Caveat (başlıklar), Space Mono (metin)
+- Sticky notes on a notepad style appearance
+- Smooth animations and transitions
+- Light color scheme (cream/white paper, dark ink color)
+- Fonts: Caveat (titles), Space Mono (text)
 
-## 🛠️ Teknolojiler
+## 🛠️ Technologies
 
 - HTML5
 - CSS3 (Grid, Flexbox, Animations)
-- Canvas API (çizim ve grafik)
-- LocalStorage API (veri depolama)
-- JavaScript (Vanilla - Framework olmadan)
+- Canvas API (drawing and graphics)
+- LocalStorage API (data storage)
+- JavaScript (Vanilla - No framework)
 
-## 📱 Nasıl Kullanılır
+## 📱 How to Use
 
-1. "Yeni Not — 20 Saniye" butonuna tıkla
-2. Canvas üzerine çiz veya yaz
-3. 20 saniye içinde çalışmanı bitir
-4. "Kaydet" butonuna tıkla veya süre dolmasını bekle
-5. Kaydedilen notlarını ana ekranda görüntüle
+1. Click the "New Note — 20 Seconds" button
+2. Draw or write on the canvas
+3. Finish your work within 20 seconds
+4. Click "Save" button or wait for the timer to end
+5. View your saved notes on the home screen
 
 ## ⏱️ Timer
 
-- Her yazı seansı 20 saniyeyle sınırlı
-- Süre bittiğinde uyarı ekranı görünür
-- Notu kaydet veya at seçeneği sunulur
-- Timer görsel olarak dairesel progress bar ile gösterilir
+- Each writing session is limited to 20 seconds
+- Alert screen appears when time runs out
+- Options to save or discard the note
+- Timer is displayed visually as a circular progress bar
 
-## 💾 Veri
+## 💾 Data
 
-- Tüm notlar tarayıcının localStorage'ında saklanır
-- Notlar resim formatında (PNG) depolanır
-- Uygulama çevrimdışı çalışır
+- All notes are stored in the browser's localStorage
+- Notes are stored in PNG image format
+- Application works offline
 
-## 📄 Dosya Yapısı
+## 📄 File Structure
 
-- `index.html` - Uygulamanın tüm kodu (HTML, CSS, JavaScript)
+- `index.html` - Complete application code (HTML, CSS, JavaScript)
 
 ---
 
-**Sürüm**: 1.0.0  
-**Lisans**: MIT  
-**Dil**: Türkçe
+**Version**: 1.0.0  
+**License**: MIT  
+**Language**: English
